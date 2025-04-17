@@ -103,9 +103,29 @@ app.get('/api/export', async (req, res) => {
   }
 })
 
+// 🗑️ Удаление гостя по ID
+app.delete('/api/form/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const form = await Form.findByPk(id)
+    if (!form) {
+      return res.status(404).json({ error: 'Гость не найден' })
+    }
+
+    await form.setAlcohols([]) // удаляем связи
+    await form.destroy()       // удаляем саму запись
+
+    res.status(200).json({ success: true })
+  } catch (err) {
+    console.error('Ошибка при удалении:', err)
+    res.status(500).json({ error: 'Ошибка сервера' })
+  }
+})
+
 // 🚀 Запуск
 async function start() {
   await sequelize.sync() // База уже создана через сиды
+  // await Alcohol.destroy({ where: {} })
   app.listen(3000, () => console.log('🚀 Сервер слушает http://localhost:3000'))
 }
 
